@@ -22,7 +22,7 @@ from ..utils.resnet_utils import myResnet
 from ..utils import resnet
 
 class DataLoaderRaw():
-    
+
     def __init__(self, opt):
         self.opt = opt
         self.coco_json = opt.get('coco_json', '')
@@ -36,7 +36,7 @@ class DataLoaderRaw():
         self.my_resnet = getattr(resnet, self.cnn_model)()
         self.my_resnet.load_state_dict(torch.load('./data/imagenet_weights/'+self.cnn_model+'.pth'))
         self.my_resnet = myResnet(self.my_resnet)
-        self.my_resnet.cuda()
+        self.my_resnet.cpu()
         self.my_resnet.eval()
 
 
@@ -110,7 +110,7 @@ class DataLoaderRaw():
                 img = np.concatenate((img, img, img), axis=2)
 
             img = img[:,:,:3].astype('float32')/255.0
-            img = torch.from_numpy(img.transpose([2,0,1])).cuda()
+            img = torch.from_numpy(img.transpose([2,0,1])).cpu()
             img = preprocess(img)
             with torch.no_grad():
                 tmp_fc, tmp_att = self.my_resnet(img)
@@ -144,4 +144,3 @@ class DataLoaderRaw():
 
     def get_vocab(self):
         return self.ix_to_word
-        

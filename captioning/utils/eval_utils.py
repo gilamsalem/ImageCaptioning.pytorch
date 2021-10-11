@@ -47,7 +47,7 @@ def getCOCO(dataset):
 def language_eval(dataset, preds, preds_n, eval_kwargs, split):
     model_id = eval_kwargs['id']
     eval_oracle = eval_kwargs.get('eval_oracle', 0)
-    
+
     # create output dictionary
     out = {}
 
@@ -117,7 +117,7 @@ def language_eval(dataset, preds, preds_n, eval_kwargs, split):
         out.update(self_cider['overall'])
         with open(cache_path_n, 'w') as outfile:
             json.dump({'allspice': allspice, 'div_stats': div_stats, 'oracle': oracle, 'self_cider': self_cider}, outfile)
-        
+
     out['bad_count_rate'] = sum([count_bad(_['caption']) for _ in preds_filt]) / float(len(preds_filt))
     outfile_path = os.path.join('eval_results/', model_id + '_' + split + '.json')
     with open(outfile_path, 'w') as outfile:
@@ -137,7 +137,7 @@ def eval_split(model, crit, loader, eval_kwargs={}):
     sample_n = eval_kwargs.get('sample_n', 1)
     remove_bad_endings = eval_kwargs.get('remove_bad_endings', 0)
     os.environ["REMOVE_BAD_ENDINGS"] = str(remove_bad_endings) # Use this nasty way to make other code clean since it's a global configuration
-    device = eval_kwargs.get('device', 'cuda')
+    device = eval_kwargs.get('device', 'cpu')
 
     # Make sure in the evaluation mode
     model.eval()
@@ -172,7 +172,7 @@ def eval_split(model, crit, loader, eval_kwargs={}):
             seq = seq.data
             entropy = - (F.softmax(seq_logprobs, dim=2) * seq_logprobs).sum(2).sum(1) / ((seq>0).to(seq_logprobs).sum(1)+1)
             perplexity = - seq_logprobs.gather(2, seq.unsqueeze(2)).squeeze(2).sum(1) / ((seq>0).to(seq_logprobs).sum(1)+1)
-        
+
         # Print beam search
         if beam_size > 1 and verbose_beam:
             for i in range(fc_feats.shape[0]):
@@ -196,7 +196,7 @@ def eval_split(model, crit, loader, eval_kwargs={}):
 
         if sample_n > 1:
             eval_split_n(model, n_predictions, [fc_feats, att_feats, att_masks, data], eval_kwargs)
-        
+
         # ix0 = data['bounds']['it_pos_now']
         ix1 = data['bounds']['it_max']
         if num_images != -1:
